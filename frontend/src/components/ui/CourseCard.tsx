@@ -7,9 +7,9 @@ interface CourseCardProps {
   title: string;
   thumbnail: string;
   price: string;
-  originalPrice?: string;
-  badge?: string;
-  description?: string;
+  originalPrice?: string | null;
+  badge?: string | null;
+  description?: string | null;
 }
 
 export default function CourseCard({

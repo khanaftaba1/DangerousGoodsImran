@@ -5,6 +5,13 @@ export const NAV_LINKS = [
   { label: "Contact", href: "/contact-us" },
 ];
 
+/** Header when signed in (matches dangerousgoods.online-style nav). */
+export const NAV_LINKS_LOGGED_IN = [
+  { label: "Start", href: "/" },
+  { label: "Courses", href: "/courses" },
+  { label: "Support Plans", href: "/pricing" },
+];
+
 export const FOOTER = {
   email: "info@dldands.com",
   description:

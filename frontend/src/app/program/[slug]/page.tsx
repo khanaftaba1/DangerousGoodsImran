@@ -3,18 +3,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckCircle } from "lucide-react";
-import { PROGRAM_DETAILS } from "@/lib/programDetails";
+import { CatalogSourceHint } from "@/components/dev/CatalogSourceHint";
+import { getProgramDetail } from "@/lib/catalog";
 import ProgramFAQ from "./ProgramFAQ";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export async function generateStaticParams() {
-  return Object.keys(PROGRAM_DETAILS).map((slug) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const program = PROGRAM_DETAILS[slug];
+  const { data: program } = await getProgramDetail(slug);
   if (!program) return {};
   return {
     title: `${program.pageTitle} | DG-online`,
@@ -24,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProgramDetailPage({ params }: Props) {
   const { slug } = await params;
-  const program = PROGRAM_DETAILS[slug];
+  const { data: program, source } = await getProgramDetail(slug);
   if (!program) notFound();
 
   return (
@@ -33,7 +30,8 @@ export default async function ProgramDetailPage({ params }: Props) {
       <section className="bg-dark py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-[46px] font-bold text-white leading-[1.25]">
+            <CatalogSourceHint label="Program detail" source={source} />
+            <h1 className="text-3xl md:text-[46px] font-bold text-white leading-[1.25] mt-2">
               {program.pageTitle}
             </h1>
             <p className="mt-6 text-text-light/80 leading-relaxed">
@@ -45,7 +43,6 @@ export default async function ProgramDetailPage({ params }: Props) {
               </p>
             )}
 
-            {/* Price + CTA */}
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <button className="rounded-[10px] bg-brand px-8 py-4 text-[15px] font-bold text-white hover:bg-brand-dark transition-colors">
                 {program.buttonLabel}

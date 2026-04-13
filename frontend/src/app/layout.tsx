@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Titillium_Web } from "next/font/google";
 import { Navbar } from "@/components/layout";
 import { Footer } from "@/components/layout";
+import { AuthProvider } from "@/contexts/AuthContext";
+import AuthModal from "@/components/auth/AuthModal";
 import "./globals.css";
 
 const titillium = Titillium_Web({
@@ -24,9 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${titillium.variable} antialiased`}>
       <body className="min-h-screen flex flex-col font-sans">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <AuthModal />
+        </AuthProvider>
       </body>
     </html>
   );

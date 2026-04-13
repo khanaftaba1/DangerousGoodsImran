@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
-import { SUBSCRIPTION_PLANS } from "@/lib/data";
+import { CatalogSourceHint } from "@/components/dev/CatalogSourceHint";
+import { getPlans } from "@/lib/catalog";
 
-export default function SubscriptionSection() {
+export default async function SubscriptionSection() {
+  const { data: plans, source } = await getPlans();
+
   return (
     <section className="bg-light-bg py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
+          <div className="flex justify-center mb-3">
+            <CatalogSourceHint label="Home plans" source={source} />
+          </div>
           <h2 className="text-3xl md:text-[38px] font-bold text-text-dark leading-tight">
             Ongoing Dangerous Goods Support
           </h2>
@@ -19,7 +25,7 @@ export default function SubscriptionSection() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {SUBSCRIPTION_PLANS.map((plan) => (
+          {plans.map((plan) => (
             <div
               key={plan.name}
               className={`rounded-xl p-8 flex flex-col ${

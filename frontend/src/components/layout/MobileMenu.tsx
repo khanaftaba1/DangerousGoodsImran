@@ -1,15 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { X } from "lucide-react";
-import { NAV_LINKS } from "@/lib/constants";
+import { X, User } from "lucide-react";
+import { NAV_LINKS, NAV_LINKS_LOGGED_IN } from "@/lib/constants";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
+  onSignIn: () => void;
+  onSignUp: () => void;
+  onSignOut: () => void;
 }
 
-export default function MobileMenu({ open, onClose }: MobileMenuProps) {
+export default function MobileMenu({
+  open,
+  onClose,
+  onSignIn,
+  onSignUp,
+  onSignOut,
+}: MobileMenuProps) {
+  const { user, loading } = useAuth();
+
   if (!open) return null;
 
   return (
@@ -25,7 +37,7 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
         </button>
 
         <nav className="mt-12 flex flex-col gap-4">
-          {NAV_LINKS.map((link) => (
+          {(user ? NAV_LINKS_LOGGED_IN : NAV_LINKS).map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -38,12 +50,51 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
         </nav>
 
         <div className="mt-8 flex flex-col gap-3">
-          <button className="w-full px-5 py-3 text-sm font-bold text-text-light border border-brand rounded-md hover:bg-brand/10 transition-colors">
-            Sign in
-          </button>
-          <button className="w-full px-5 py-3 text-sm font-bold text-white bg-brand rounded-md hover:bg-brand-dark transition-colors">
-            Sign up
-          </button>
+          {loading ? null : user ? (
+            <>
+              <Link
+                href="/account"
+                onClick={onClose}
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-bold text-text-light border border-white/20 rounded-md hover:bg-white/10 transition-colors"
+              >
+                <User size={18} />
+                Me — Account
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  onSignOut();
+                  onClose();
+                }}
+                className="w-full px-5 py-3 text-sm font-bold text-white border border-white rounded-md bg-transparent hover:bg-white/10 transition-colors"
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  onSignIn();
+                  onClose();
+                }}
+                className="w-full px-5 py-3 text-sm font-bold text-text-light border border-brand rounded-md hover:bg-brand/10 transition-colors"
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onSignUp();
+                  onClose();
+                }}
+                className="w-full px-5 py-3 text-sm font-bold text-white bg-brand rounded-md hover:bg-brand-dark transition-colors"
+              >
+                Sign up
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

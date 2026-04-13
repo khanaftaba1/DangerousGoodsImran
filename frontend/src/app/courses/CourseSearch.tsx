@@ -3,12 +3,16 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { CourseCard } from "@/components/ui";
-import { FEATURED_COURSES } from "@/lib/data";
+import type { CourseListItem } from "@/lib/types";
 
-export default function CourseSearch() {
+interface CourseSearchProps {
+  courses: CourseListItem[];
+}
+
+export default function CourseSearch({ courses }: CourseSearchProps) {
   const [query, setQuery] = useState("");
 
-  const filtered = FEATURED_COURSES.filter(
+  const filtered = courses.filter(
     (course) =>
       course.title.toLowerCase().includes(query.toLowerCase()) ||
       course.description.toLowerCase().includes(query.toLowerCase())

@@ -38,6 +38,8 @@ A full-stack clone of [dangerousgoods.online](https://dangerousgoods.online), bu
 | `/pricing` | Support plans, learning programs, FAQ |
 | `/program/:slug` | Program detail (3 programs) |
 | `/contact-us` | Contact form |
+| `/account` | Signed-in user profile (Part 7) |
+| `/auth/callback` | Supabase OAuth return — server exchanges `code` (PKCE in cookies); then `/auth/complete` syncs session |
 | `/terms` | Terms & Conditions |
 | `/privacy` | Privacy Policy |
 
@@ -48,7 +50,18 @@ A full-stack clone of [dangerousgoods.online](https://dangerousgoods.online), bu
 - Node.js 18+
 - npm
 
-### Frontend
+### Run frontend + backend together (recommended)
+
+From the **repository root**:
+
+```bash
+npm install
+npm run dev
+```
+
+This starts the API on port **5000** and Next.js on **3000**. On Linux it frees stale listeners on those ports first. Open [http://localhost:3000](http://localhost:3000).
+
+### Frontend only
 
 ```bash
 cd frontend
@@ -57,9 +70,9 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). Course, program, and pricing data are loaded from the API; run the backend or point `API_URL` at a reachable server, or those sections will be empty until the API responds.
 
-### Backend
+### Backend only
 
 ```bash
 cd backend
@@ -76,17 +89,28 @@ API runs on [http://localhost:5000](http://localhost:5000).
 
 | Variable | Description |
 |----------|-------------|
-| `NEXT_PUBLIC_API_URL` | Backend API URL (client-side) |
-| `API_URL` | Backend API URL (server-side) |
+| `NEXT_PUBLIC_API_URL` | Backend API base including `/api` (e.g. `http://127.0.0.1:5000/api`) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (OAuth PKCE in the browser) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `API_URL` | Same as above for server-side fetches (catalog) if different from default |
 
 ### Backend (`backend/.env`)
 
 | Variable | Description |
 |----------|-------------|
 | `PORT` | Server port (default: 5000) |
-| `FRONTEND_URL` | Frontend origin for CORS |
+| `FRONTEND_URL` | Frontend origin for CORS and OAuth `redirectTo` |
 | `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key |
+| `SUPABASE_ANON_KEY` | Anon key — used for password/OAuth/refresh on the server |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role — database access and token verification |
+
+### Supabase Auth (Part 7)
+
+In the Supabase dashboard: **Authentication → URL configuration** — set **Site URL** to `http://localhost:3000` and add **Redirect URLs** `http://localhost:3000/auth/callback`. Enable **Google** and **LinkedIn (OIDC)** providers under **Authentication → Providers** (configure client IDs/secrets there).
+
+## Deployment (free tier)
+
+See **[docs/DEPLOY.md](docs/DEPLOY.md)** for Vercel (frontend) + Render (backend) + Supabase env and OAuth URLs.
 
 ## License
 

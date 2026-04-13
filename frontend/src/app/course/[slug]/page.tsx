@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Clock, GraduationCap, FileCheck, User, Award, Check } from "lucide-react";
-import { COURSE_DETAILS, TRAINER } from "@/lib/courseDetails";
+import { CatalogSourceHint } from "@/components/dev/CatalogSourceHint";
+import type { CatalogDataSource } from "@/lib/catalog";
+import { getCourseDetail } from "@/lib/catalog";
+import type { CourseDetail } from "@/lib/types";
+import { TRAINER } from "@/lib/courseDetails";
 import CourseDetailFAQ from "./CourseDetailFAQ";
 
 interface Props {
@@ -11,7 +15,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const course = COURSE_DETAILS[slug];
+  const { data: course } = await getCourseDetail(slug);
   if (!course) return { title: "Course Not Found" };
   return {
     title: course.pageTitle,
@@ -19,13 +23,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export function generateStaticParams() {
-  return Object.keys(COURSE_DETAILS).map((slug) => ({ slug }));
-}
-
 export default async function CourseDetailPage({ params }: Props) {
   const { slug } = await params;
-  const course = COURSE_DETAILS[slug];
+  const { data: course, source } = await getCourseDetail(slug);
   if (!course) notFound();
 
   const meta = [
@@ -37,25 +37,29 @@ export default async function CourseDetailPage({ params }: Props) {
   ];
 
   if (course.layout === "meta_bar") {
-    return <MetaBarLayout course={course} meta={meta} />;
+    return (
+      <MetaBarLayout course={course} meta={meta} catalogSource={source} />
+    );
   }
 
-  return <SidebarLayout course={course} meta={meta} />;
+  return <SidebarLayout course={course} meta={meta} catalogSource={source} />;
 }
 
 function SidebarLayout({
   course,
   meta,
+  catalogSource,
 }: {
-  course: (typeof COURSE_DETAILS)[string];
+  course: CourseDetail;
   meta: { icon: typeof Clock; label: string; value: string }[];
+  catalogSource: CatalogDataSource;
 }) {
   return (
     <>
-      {/* Hero */}
       <section className="bg-dark py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl md:text-[46px] font-bold text-white leading-[1.25] max-w-3xl">
+          <CatalogSourceHint label="Course detail" source={catalogSource} />
+          <h1 className="text-3xl md:text-[46px] font-bold text-white leading-[1.25] max-w-3xl mt-2">
             {course.title}
           </h1>
           <p className="mt-4 text-lg text-text-light/80 max-w-3xl leading-relaxed">
@@ -64,13 +68,10 @@ function SidebarLayout({
         </div>
       </section>
 
-      {/* Main content + Sidebar */}
       <section className="bg-body-bg py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-10">
-            {/* Left column */}
             <div className="lg:col-span-2 space-y-12">
-              {/* Overview */}
               <div>
                 <h2 className="text-xl font-bold text-text-dark mb-4">
                   Course overview
@@ -100,7 +101,6 @@ function SidebarLayout({
                 )}
               </div>
 
-              {/* FAQ */}
               {course.faq.length > 0 && (
                 <div>
                   <h2 className="text-xl font-bold text-text-dark mb-4">
@@ -110,7 +110,6 @@ function SidebarLayout({
                 </div>
               )}
 
-              {/* Trainer */}
               <div>
                 <h2 className="text-xl font-bold text-text-dark mb-4">
                   About the Trainer
@@ -130,7 +129,6 @@ function SidebarLayout({
                 </div>
               </div>
 
-              {/* Objectives */}
               {course.objectives.length > 0 && (
                 <div>
                   <h2 className="text-xl font-bold text-text-dark mb-4">
@@ -153,10 +151,8 @@ function SidebarLayout({
               )}
             </div>
 
-            {/* Right sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
-                {/* Thumbnail */}
                 <div className="relative aspect-video rounded-xl overflow-hidden shadow-sm">
                   <Image
                     src={course.thumbnail}
@@ -166,7 +162,6 @@ function SidebarLayout({
                   />
                 </div>
 
-                {/* Meta card */}
                 <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
                   <h3 className="text-sm font-bold text-text-dark uppercase tracking-wider mb-4">
                     Lesson series
@@ -186,9 +181,10 @@ function SidebarLayout({
                   </ul>
                 </div>
 
-                {/* CTA */}
                 <button className="w-full rounded-[10px] bg-brand px-6 py-4 text-[15px] font-bold text-white hover:bg-brand-dark transition-colors">
-                  {course.price === "Free" ? "Start Free" : `Enroll — ${course.price}`}
+                  {course.price === "Free"
+                    ? "Start Free"
+                    : `Enroll — ${course.price}`}
                 </button>
               </div>
             </div>
@@ -202,29 +198,31 @@ function SidebarLayout({
 function MetaBarLayout({
   course,
   meta,
+  catalogSource,
 }: {
-  course: (typeof COURSE_DETAILS)[string];
+  course: CourseDetail;
   meta: { icon: typeof Clock; label: string; value: string }[];
+  catalogSource: CatalogDataSource;
 }) {
   return (
     <>
-      {/* Hero */}
       <section className="bg-dark py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl md:text-[46px] font-bold text-white leading-[1.25] max-w-3xl">
+          <CatalogSourceHint label="Course detail" source={catalogSource} />
+          <h1 className="text-3xl md:text-[46px] font-bold text-white leading-[1.25] max-w-3xl mt-2">
             {course.title}
           </h1>
           <p className="mt-4 text-lg text-text-light/80 max-w-3xl leading-relaxed">
             {course.subtitle}
           </p>
-          <p className="mt-2 text-text-light/60 max-w-3xl">{course.description}</p>
+          <p className="mt-2 text-text-light/60 max-w-3xl">
+            {course.description}
+          </p>
         </div>
       </section>
 
-      {/* Content bullets + meta bar */}
       <section className="bg-body-bg py-12 md:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          {/* Course content */}
           {course.contentBullets && course.contentBullets.length > 0 && (
             <div>
               <h2 className="text-xl font-bold text-text-dark mb-2">
@@ -247,7 +245,6 @@ function MetaBarLayout({
             </div>
           )}
 
-          {/* Meta bar */}
           <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
             <h3 className="text-sm font-bold text-text-dark mb-4">
               Course at a Glance
@@ -267,17 +264,17 @@ function MetaBarLayout({
             </div>
           </div>
 
-          {/* Price + CTA */}
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-xl font-bold text-text-dark">
               Price: {course.priceVat}
             </span>
             <button className="rounded-[10px] bg-brand px-8 py-3 text-[15px] font-bold text-white hover:bg-brand-dark transition-colors">
-              {course.price === "Free" ? "Start Free" : `Enroll — ${course.price}`}
+              {course.price === "Free"
+                ? "Start Free"
+                : `Enroll — ${course.price}`}
             </button>
           </div>
 
-          {/* Trainer */}
           <div>
             <h2 className="text-xl font-bold text-text-dark mb-4">
               About the Trainer
@@ -297,7 +294,6 @@ function MetaBarLayout({
             </div>
           </div>
 
-          {/* FAQ */}
           {course.faq.length > 0 && (
             <div>
               <h2 className="text-xl font-bold text-text-dark mb-4">

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import CourseSearch from "./CourseSearch";
-import { LEARNING_PROGRAMS } from "@/lib/programDetails";
+import { CatalogSourceHint } from "@/components/dev/CatalogSourceHint";
+import { getCourseList, getProgramList } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Online IATA DGR Dangerous Goods Training Courses | From €25",
@@ -10,7 +11,12 @@ export const metadata: Metadata = {
     "Online dangerous goods training for shipping and logistics companies. Modular courses aligned with IATA regulations.",
 };
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const [
+    { data: courses, source: coursesSource },
+    { data: programs, source: programsSource },
+  ] = await Promise.all([getCourseList(), getProgramList()]);
+
   return (
     <>
       {/* Hero */}
@@ -47,7 +53,8 @@ export default function CoursesPage() {
       <section id="courses" className="bg-body-bg py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
-            <h2 className="text-2xl md:text-[38px] font-bold text-text-dark leading-tight">
+            <CatalogSourceHint label="Courses list" source={coursesSource} />
+            <h2 className="text-2xl md:text-[38px] font-bold text-text-dark leading-tight mt-2">
               Online Dangerous Goods Training Courses
             </h2>
             <p className="mt-4 max-w-3xl text-text-muted leading-relaxed">
@@ -60,7 +67,7 @@ export default function CoursesPage() {
             </p>
           </div>
 
-          <CourseSearch />
+          <CourseSearch courses={courses || []} />
         </div>
       </section>
 
@@ -92,7 +99,8 @@ export default function CoursesPage() {
       <section className="bg-dark py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-12">
-            <h2 className="text-2xl md:text-[38px] font-bold text-white leading-tight">
+            <CatalogSourceHint label="Programs list" source={programsSource} />
+            <h2 className="text-2xl md:text-[38px] font-bold text-white leading-tight mt-2">
               Learning Programs (Advanced &amp; Custom)
             </h2>
             <p className="mt-4 text-text-light/70 leading-relaxed">
@@ -111,58 +119,64 @@ export default function CoursesPage() {
             All learning programs
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {LEARNING_PROGRAMS.map((program) => (
-              <Link
-                key={program.slug}
-                href={`/program/${program.slug}`}
-                className="group block"
-              >
-                <div className="bg-[#1a1a2e] rounded-xl overflow-hidden border border-white/10 hover:border-brand/40 transition-colors h-full flex flex-col">
-                  <div className="relative aspect-[16/10] overflow-hidden bg-brand-dark/30">
-                    <Image
-                      src={program.heroImage}
-                      alt={program.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                    <span className="absolute top-3 left-3 bg-brand-dark/80 text-text-light text-xs font-bold px-2.5 py-1 rounded">
-                      {program.courseCount} Courses
-                    </span>
-                    {program.badge && (
-                      <span className="absolute top-3 right-3 bg-brand text-white text-xs font-bold px-2.5 py-1 rounded rotate-12 origin-center">
-                        {program.badge}
+          {programs && programs.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {programs.map((program) => (
+                <Link
+                  key={program.slug}
+                  href={`/program/${program.slug}`}
+                  className="group block"
+                >
+                  <div className="bg-[#1a1a2e] rounded-xl overflow-hidden border border-white/10 hover:border-brand/40 transition-colors h-full flex flex-col">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-brand-dark/30">
+                      <Image
+                        src={program.heroImage}
+                        alt={program.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <span className="absolute top-3 left-3 bg-brand-dark/80 text-text-light text-xs font-bold px-2.5 py-1 rounded">
+                        {program.courseCount} Courses
                       </span>
-                    )}
-                  </div>
-                  <div className="p-5 flex flex-col flex-1">
-                    <h3 className="text-lg font-bold text-white">
-                      {program.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-text-light/60 flex-1">
-                      {program.description}
-                    </p>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="inline-flex items-center justify-center rounded-lg bg-brand px-5 py-2.5 text-sm font-bold text-white group-hover:bg-brand-dark transition-colors">
-                        {program.buttonLabel}
-                      </span>
-                      <div className="text-right">
-                        {program.originalPrice && (
-                          <span className="block text-xs text-text-light/40 line-through">
-                            {program.originalPrice}
-                          </span>
-                        )}
-                        <span className="text-base font-bold text-white">
-                          {program.price}
+                      {program.badge && (
+                        <span className="absolute top-3 right-3 bg-brand text-white text-xs font-bold px-2.5 py-1 rounded rotate-12 origin-center">
+                          {program.badge}
                         </span>
+                      )}
+                    </div>
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="text-lg font-bold text-white">
+                        {program.title}
+                      </h3>
+                      <p className="mt-1 text-sm text-text-light/60 flex-1">
+                        {program.description}
+                      </p>
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="inline-flex items-center justify-center rounded-lg bg-brand px-5 py-2.5 text-sm font-bold text-white group-hover:bg-brand-dark transition-colors">
+                          {program.buttonLabel}
+                        </span>
+                        <div className="text-right">
+                          {program.originalPrice && (
+                            <span className="block text-xs text-text-light/40 line-through">
+                              {program.originalPrice}
+                            </span>
+                          )}
+                          <span className="text-base font-bold text-white">
+                            {program.price}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-text-light/60">
+              Programs are currently unavailable.
+            </p>
+          )}
         </div>
       </section>
     </>
