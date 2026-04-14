@@ -39,7 +39,7 @@ A full-stack clone of [dangerousgoods.online](https://dangerousgoods.online), bu
 | `/program/:slug` | Program detail (3 programs) |
 | `/contact-us` | Contact form |
 | `/account` | Signed-in user profile (Part 7) |
-| `/auth/callback` | Supabase OAuth return — server exchanges `code` (PKCE in cookies); then `/auth/complete` syncs session |
+| `/auth/callback` | Supabase OAuth return — server exchanges `code` (PKCE in cookies); then `/auth/complete` |
 | `/terms` | Terms & Conditions |
 | `/privacy` | Privacy Policy |
 
@@ -89,10 +89,10 @@ API runs on [http://localhost:5000](http://localhost:5000).
 
 | Variable | Description |
 |----------|-------------|
-| `NEXT_PUBLIC_API_URL` | Backend API base including `/api` (e.g. `http://127.0.0.1:5000/api`) |
+| `NEXT_PUBLIC_API_URL` | **Backend API base** including `/api` — used in the **browser** (auth, profile, client fetches). Example: `http://localhost:5000/api` |
+| `API_URL` | **Same URL as `NEXT_PUBLIC_API_URL`** — used only on the **server** (SSR catalog). **Required on Vercel** or course/program lists stay empty. |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (OAuth PKCE in the browser) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
-| `API_URL` | Same as above for server-side fetches (catalog) if different from default |
 
 ### Backend (`backend/.env`)
 
@@ -108,9 +108,13 @@ API runs on [http://localhost:5000](http://localhost:5000).
 
 In the Supabase dashboard: **Authentication → URL configuration** — set **Site URL** to `http://localhost:3000` and add **Redirect URLs** `http://localhost:3000/auth/callback`. Enable **Google** and **LinkedIn (OIDC)** providers under **Authentication → Providers** (configure client IDs/secrets there).
 
-## Deployment (free tier)
+## Deploy frontend (Vercel)
 
-See **[docs/DEPLOY.md](docs/DEPLOY.md)** for Vercel (frontend) + Render (backend) + Supabase env and OAuth URLs.
+Use **Root Directory** `frontend`, set `NEXT_PUBLIC_*`, `API_URL`, and Supabase redirect URLs. Step-by-step: [docs/VERCEL.md](docs/VERCEL.md).
+
+## Deploy backend (Render — free)
+
+Express runs as a **Web Service** (not Vercel). Use **Root Directory** `backend`, `npm install && npm run build`, `npm start`. Step-by-step: [docs/RENDER-BACKEND.md](docs/RENDER-BACKEND.md).
 
 ## License
 

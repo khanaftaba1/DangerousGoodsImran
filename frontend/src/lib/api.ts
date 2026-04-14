@@ -1,8 +1,9 @@
 import axios from "axios";
+import { getPublicApiBase } from "./api-base";
 
 /** Client-side API (auth, checkout, etc.). Server Components use `@/lib/catalog` / `server-api`. */
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+  baseURL: getPublicApiBase(),
   withCredentials: true,
 });
 
