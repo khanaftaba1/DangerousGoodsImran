@@ -248,7 +248,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
     .from('profiles')
     .select('*')
     .eq('id', userData.user.id)
-    .single();
+    .maybeSingle();
 
   if (profileErr) {
     res.status(500).json({ success: false, error: profileErr.message });
@@ -259,7 +259,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
     success: true,
     data: {
       user: { id: userData.user.id, email: userData.user.email },
-      profile: profileRow,
+      profile: profileRow ?? null,
     },
   });
 }
@@ -318,7 +318,17 @@ async function ensureProfileRow(user: User): Promise<void> {
   const { error } = await supabase.from('profiles').upsert(row, {
     onConflict: 'id',
   });
-  if (error && !String(error.message).includes('duplicate')) {
-    console.warn('[auth] ensureProfileRow:', error.message);
+  if (error) {
+    if (String(error.message).includes('duplicate')) {
+      return;
+    }
+    console.error('[auth] ensureProfileRow:', error.message);
+    const minimal = await supabase.from('profiles').upsert(
+      { id: user.id, updated_at: new Date().toISOString() },
+      { onConflict: 'id' }
+    );
+    if (minimal.error) {
+      console.error('[auth] ensureProfileRow (minimal):', minimal.error.message);
+    }
   }
 }

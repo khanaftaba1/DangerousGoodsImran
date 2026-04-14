@@ -25,7 +25,8 @@ In **Environment** (same page or **Environment** tab), add:
 | Key | Value |
 |-----|--------|
 | `NODE_VERSION` | `20` or `22` (recommended; matches local) |
-| `FRONTEND_URL` | Your **Vercel** origin(s), **comma-separated** if you use both production and preview URLs, e.g. `https://your-app.vercel.app,https://your-app-git-main-xxx.vercel.app` — **required for CORS**. No trailing slashes. OAuth redirect uses the **first** URL only. |
+| `FRONTEND_URL` | Your **Vercel** origin(s), **comma-separated** (prod + any fixed preview URLs). No trailing slashes. OAuth redirect uses the **first** URL only. |
+| `CORS_ALLOW_VERCEL` | Set to **`1`** to allow **any** `https://*.vercel.app` origin (covers **new preview URLs** on every deploy without editing `FRONTEND_URL`). Optional; tighten in production if you prefer an explicit allow list only. |
 | `SUPABASE_URL` | From Supabase project settings |
 | `SUPABASE_ANON_KEY` | Anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role (server only, never expose to browser) |

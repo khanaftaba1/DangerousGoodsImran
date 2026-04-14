@@ -21,3 +21,24 @@ export function getCorsAllowedOrigins(): string[] {
     ]),
   ];
 }
+
+/**
+ * When `CORS_ALLOW_VERCEL=1`, allow any `https://*.vercel.app` origin so **preview**
+ * deployments (new URL per deploy) work without editing `FRONTEND_URL` each time.
+ * Optional: keep off in production if you only use explicit `FRONTEND_URL` origins.
+ */
+export function isVercelPreviewOriginAllowed(origin: string): boolean {
+  if (process.env.CORS_ALLOW_VERCEL !== "1") return false;
+  try {
+    const u = new URL(origin);
+    return u.protocol === "https:" && u.hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
+export function isCorsOriginAllowed(origin: string | undefined): boolean {
+  if (!origin) return true;
+  if (getCorsAllowedOrigins().includes(origin)) return true;
+  return isVercelPreviewOriginAllowed(origin);
+}

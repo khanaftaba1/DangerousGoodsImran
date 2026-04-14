@@ -10,14 +10,14 @@ export async function getProfile(req: AuthRequest, res: Response): Promise<void>
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     res.status(500).json({ success: false, error: error.message });
     return;
   }
 
-  res.json({ success: true, data: data });
+  res.json({ success: true, data: data ?? null });
 }
 
 export async function updateProfile(req: AuthRequest, res: Response): Promise<void> {

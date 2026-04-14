@@ -36,23 +36,56 @@ Changing **`API_URL`** alone does **not** update the client bundle — only **`N
 
 Redeploy after changing any `NEXT_PUBLIC_*` variable.
 
-## 3. Supabase OAuth
+## 3. Supabase OAuth — local + Vercel (prod & previews)
 
-In **Supabase → Authentication → URL configuration**, add your Vercel URL:
+### Site URL (pick one default)
 
-- **Site URL:** `https://your-project.vercel.app` (or your custom domain).
-- **Redirect URLs:** include  
-  `https://your-project.vercel.app/auth/callback`
+- **Local-first dev:** `http://localhost:3000`  
+- **Production-first:** your stable Vercel URL, e.g. `https://your-project.vercel.app`  
 
-Keep **Google / LinkedIn** provider settings as in the Supabase docs (provider dashboards use Supabase’s callback URLs, not your app URL).
+This is the **fallback** when a redirect doesn’t match the allow list. It does **not** replace listing real callback URLs below.
 
-## 4. Backend CORS (when the API is deployed)
+### Redirect URLs — add **each line** (paths matter)
 
-Set the Express **`FRONTEND_URL`** env var to your Vercel URL (e.g. `https://your-project.vercel.app`) so cookies and OAuth redirects match.
+OAuth must be allowed to return to **`/auth/callback`**, not only `/`.
+
+**Local**
+
+- `http://localhost:3000/auth/callback`
+- `http://127.0.0.1:3000/auth/callback` (if you ever open the app on `127.0.0.1`)
+
+**Vercel — production**
+
+- `https://YOUR-PRODUCTION-NAME.vercel.app/auth/callback`  
+  (the stable production hostname from Vercel → Domains / project URL)
+
+**Vercel — preview deployments** (branch/PR URLs change)
+
+Use Supabase **wildcards** so every preview works without adding URLs one-by-one:
+
+- `https://*-YOUR-TEAM-SLUG.vercel.app/**`  
+  Example shape: `https://*-aftabkhan07s-projects.vercel.app/**`  
+  (Replace with your **Vercel team slug** — it appears in preview URLs like `dangerous-goods-imran-xxx-aftabkhan07s-projects.vercel.app`.)
+
+Alternatively add only the previews you need, e.g.:
+
+- `https://dangerous-goods-imran-r7lq0uxo1-aftabkhan07s-projects.vercel.app/auth/callback`
+
+**Do not** rely on `https://something.vercel.app/` without **`/auth/callback`** — that is the site root, not the OAuth return path.
+
+Keep **Google / LinkedIn** OAuth client redirect URIs pointing at **Supabase** (`https://<project-ref>.supabase.co/auth/v1/callback`), not your app URL.
+
+### Backend CORS (Express)
+
+Set **`FRONTEND_URL`** on Render to a **comma-separated** list of origins you use, e.g.:
+
+`http://localhost:3000,https://your-prod.vercel.app,https://dangerous-goods-imran-xxx-aftabkhan07s-projects.vercel.app`
+
+(Add each preview URL you need, or test against production only.)
 
 If the API is **not** deployed yet, the marketing site can still load; authenticated flows and API-dependent sections need a reachable **`NEXT_PUBLIC_API_URL`** / **`API_URL`**.
 
-## 5. Monorepo note
+## 4. Monorepo note
 
 `package-lock.json` may exist at the repo root. Vercel with **Root Directory = `frontend`** uses **`frontend/package.json`** and installs dependencies inside `frontend/` — that is correct.
 
@@ -60,7 +93,7 @@ The repo includes **`frontend/vercel.json`** so Vercel detects **Next.js** even 
 
 ---
 
-## Troubleshooting: `404 NOT_FOUND` (Vercel)
+## 5. Troubleshooting: `404 NOT_FOUND` (Vercel)
 
 1. **Framework Preset is “Other” (most common)**  
    In **Settings → Build and Deployment**, if **Framework Preset** is **Other**, change it to **Next.js** and redeploy.  

@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
-import { getCorsAllowedOrigins } from './config/frontendUrl';
+import { isCorsOriginAllowed } from './config/frontendUrl';
 import courseRoutes from './routes/courseRoutes';
 import programRoutes from './routes/programRoutes';
 import planRoutes from './routes/planRoutes';
@@ -22,10 +22,9 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
-const allowedOrigins = getCorsAllowedOrigins();
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isCorsOriginAllowed(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
