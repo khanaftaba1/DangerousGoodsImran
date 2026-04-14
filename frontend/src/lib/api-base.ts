@@ -5,6 +5,7 @@
  * - SSR only: `API_URL` — should match the public URL in production (see `.env.example`).
  *
  * When unset, local dev defaults apply (see `DEFAULT_API_BASE`).
+ * On Vercel, set `NEXT_PUBLIC_API_URL` and **redeploy** so the client bundle picks it up (env is inlined at build time).
  */
 const DEFAULT_API_BASE = "http://localhost:5000/api";
 

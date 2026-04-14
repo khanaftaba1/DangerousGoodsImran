@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
+import { getCorsAllowedOrigins } from './config/frontendUrl';
 import courseRoutes from './routes/courseRoutes';
 import programRoutes from './routes/programRoutes';
 import planRoutes from './routes/planRoutes';
@@ -21,13 +22,7 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
-const allowedOrigins = [
-  ...new Set([
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
-  ]),
-];
+const allowedOrigins = getCorsAllowedOrigins();
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {

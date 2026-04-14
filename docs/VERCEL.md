@@ -28,7 +28,13 @@ Optional:
 
 - `NEXT_PUBLIC_SHOW_CATALOG_SOURCE=1` — debug badge for catalog source.
 
-Redeploy after changing env vars.
+### Critical: `NEXT_PUBLIC_*` is baked in at **build** time
+
+Next.js replaces `process.env.NEXT_PUBLIC_API_URL` in the **client JavaScript when `next build` runs**. If you add or change `NEXT_PUBLIC_API_URL` in the Vercel dashboard **after** a deployment, the **browser can keep calling the old URL** (e.g. `http://localhost:5000`) until you **redeploy** (Deployments → **Redeploy**, ideally **clear cache**).
+
+Changing **`API_URL`** alone does **not** update the client bundle — only **`NEXT_PUBLIC_API_URL`** does, and only after a **new build**.
+
+Redeploy after changing any `NEXT_PUBLIC_*` variable.
 
 ## 3. Supabase OAuth
 

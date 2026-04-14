@@ -7,10 +7,9 @@ import {
   REFRESH_TOKEN_COOKIE,
   getAccessTokenFromRequest,
 } from '../utils/authCookies';
+import { getPrimaryFrontendUrl } from '../config/frontendUrl';
 
 type OAuthProvider = 'google' | 'linkedin_oidc';
-
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 function sessionFromResponse(
   res: Response,
@@ -211,7 +210,7 @@ export async function getOAuthUrl(req: Request, res: Response): Promise<void> {
   const { data, error } = await supabaseAuth.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${FRONTEND_URL.replace(/\/$/, '')}/auth/callback`,
+      redirectTo: `${getPrimaryFrontendUrl()}/auth/callback`,
       skipBrowserRedirect: true,
     },
   });
